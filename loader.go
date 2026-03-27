@@ -60,6 +60,10 @@ func Load(path string) (*Skill, error) {
 	if err := yaml.Unmarshal(bytes.Join(frontmatterLines, []byte("\n")), s); err != nil {
 		return nil, fmt.Errorf("failed to parse frontmatter: %w", err)
 	}
+	if err := s.Validate(); err != nil {
+		return nil, err
+	}
+	s.Internal = internalMetadata(s.Metadata) || internalMetadata(s.Extra)
 
 	s.Instructions = string(bytes.TrimSpace(bytes.Join(instructionLines, []byte("\n"))))
 	return s, nil

@@ -5,6 +5,11 @@ spec](https://agentskills.io/specification). It loads `SKILL.md` bundles,
 validates skill names, and gives you a deterministic registry for discovery and
 progressive disclosure.
 
+It accepts the common frontmatter fields used in current skill ecosystems:
+`name`, `description`, `license`, `compatibility`, `metadata`, and
+`allowed-tools`. `allowed-tools` can be written as either the spec's
+space-delimited string or a YAML list.
+
 If you want the broader ecosystem context, start here:
 
 - Spec: [agentskills.io/specification](https://agentskills.io/specification)
@@ -36,7 +41,7 @@ func main() {
 
 ## What It Exposes
 
-- `Skill` for parsed `SKILL.md` metadata and body text
+- `Skill` for parsed `SKILL.md` metadata and body text, including `metadata.internal`
 - `Load` for reading a single `SKILL.md`
 - `Registry` for discovery, lookup, and listing
 - `ValidateName` for the skill-name rules used by the runtime tools

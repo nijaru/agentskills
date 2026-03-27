@@ -11,6 +11,11 @@ func TestLoader(t *testing.T) {
 name: test-skill
 description: A test skill for testing.
 allowed-tools: [bash, read_file]
+license: Apache-2.0
+compatibility: Requires git and jq
+metadata:
+  author: example-org
+  version: "1.0"
 ---
 # Instructions
 Use this skill for testing purposes.
@@ -32,11 +37,52 @@ Use this skill for testing purposes.
 	if s.Description != "A test skill for testing." {
 		t.Errorf("expected description, got %s", s.Description)
 	}
+	if s.License != "Apache-2.0" {
+		t.Errorf("expected license Apache-2.0, got %s", s.License)
+	}
+	if s.Compatibility != "Requires git and jq" {
+		t.Errorf("expected compatibility, got %s", s.Compatibility)
+	}
 	if len(s.AllowedTools) != 2 || s.AllowedTools[0] != "bash" {
 		t.Errorf("expected allowed-tools [bash, read_file], got %v", s.AllowedTools)
 	}
+	if s.Metadata["author"] != "example-org" {
+		t.Errorf("expected metadata.author example-org, got %v", s.Metadata["author"])
+	}
+	if s.Metadata["version"] != "1.0" {
+		t.Errorf("expected metadata.version 1.0, got %v", s.Metadata["version"])
+	}
 	if s.Instructions != "# Instructions\nUse this skill for testing purposes." {
 		t.Errorf("expected instructions, got %s", s.Instructions)
+	}
+}
+
+func TestLoaderScalarAllowedToolsAndInternal(t *testing.T) {
+	content := `---
+name: internal-skill
+description: Internal test skill.
+allowed-tools: Bash(git:*) Bash(jq:*) Read
+metadata:
+  internal: true
+  owner: example
+---
+Body.
+`
+	tmp := t.TempDir()
+	path := filepath.Join(tmp, "SKILL.md")
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	s, err := Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !s.Internal {
+		t.Fatal("expected internal skill to be marked internal")
+	}
+	if len(s.AllowedTools) != 3 || s.AllowedTools[0] != "Bash(git:*)" {
+		t.Fatalf("unexpected allowed-tools: %v", s.AllowedTools)
 	}
 }
 
@@ -79,6 +125,20 @@ func TestValidateName(t *testing.T) {
 		if !c.ok && err == nil {
 			t.Errorf("name=%q: expected error", c.name)
 		}
+	}
+}
+
+func TestValidateSkill(t *testing.T) {
+	s := &Skill{Name: "pdf-processing", Description: "Extract PDFs"}
+	if err := s.Validate(); err != nil {
+		t.Fatalf("validate: %v", err)
+	}
+
+	if err := (&Skill{Name: "bad name", Description: "x"}).Validate(); err == nil {
+		t.Fatal("expected invalid name to fail")
+	}
+	if err := (&Skill{Name: "ok", Description: ""}).Validate(); err == nil {
+		t.Fatal("expected empty description to fail")
 	}
 }
 
