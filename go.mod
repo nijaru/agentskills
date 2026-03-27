@@ -1,4 +1,4 @@
-module github.com/nijaru/agentskills-go
+module github.com/nijaru/agentskills
 
 go 1.26.1
 
