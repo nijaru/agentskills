@@ -1,6 +1,6 @@
-# agentskills
+# agentskills-go
 
-`agentskills` is a small Go implementation of the Agent Skills spec for
+`agentskills-go` is a small Go implementation of the Agent Skills spec for
 loading, validating, and discovering `SKILL.md` bundles.
 
 It follows the current `agentskills` ecosystem conventions:
