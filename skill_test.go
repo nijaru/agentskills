@@ -120,6 +120,10 @@ func TestValidateName(t *testing.T) {
 		{"my_skill", false},
 		{strings.Repeat("a", 64), true},
 		{strings.Repeat("a", 65), false},
+		{"技能", true},
+		{"мой-навык", true},
+		{"навык", true},
+		{"НАВЫК", false},
 	}
 	for _, c := range cases {
 		err := ValidateName(c.name)
@@ -129,6 +133,20 @@ func TestValidateName(t *testing.T) {
 		if !c.ok && err == nil {
 			t.Errorf("name=%q: expected error", c.name)
 		}
+	}
+}
+
+func TestValidateNameNFKCNormalization(t *testing.T) {
+	// café with combining accent (5 chars) should normalize to precomposed (4 chars)
+	decomposed := "cafe\u0301"
+	composed := "caf\u00e9"
+
+	// Both should be valid after normalization
+	if err := ValidateName(decomposed); err != nil {
+		t.Errorf("decomposed form: unexpected error: %v", err)
+	}
+	if err := ValidateName(composed); err != nil {
+		t.Errorf("composed form: unexpected error: %v", err)
 	}
 }
 
