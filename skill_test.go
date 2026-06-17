@@ -12,7 +12,7 @@ func TestLoader(t *testing.T) {
 	content := `---
 name: test-skill
 description: A test skill for testing.
-allowed-tools: bash read_file
+allowed-tools: [bash, read_file]
 license: Apache-2.0
 compatibility: Requires git and jq
 metadata:
