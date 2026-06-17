@@ -9,15 +9,15 @@ import (
 // Skill represents a reusable unit of methodology and knowledge.
 // It is defined by a SKILL.md file with YAML frontmatter.
 type Skill struct {
-	Name         string         `yaml:"name"`
-	Description  string         `yaml:"description"`
-	License      string         `yaml:"license,omitempty"`
-	Compatibility string        `yaml:"compatibility,omitempty"`
-	Metadata     map[string]any `yaml:"metadata,omitempty"`
-	AllowedTools ToolList       `yaml:"allowed-tools,omitempty"`
-	Instructions string         `yaml:"-"`
-	Internal     bool           `yaml:"-"`
-	Extra        map[string]any `yaml:",inline"`
+	Name         string            `yaml:"name"`
+	Description  string            `yaml:"description"`
+	License      string            `yaml:"license,omitempty"`
+	Compatibility string           `yaml:"compatibility,omitempty"`
+	Metadata     map[string]string `yaml:"metadata,omitempty"`
+	AllowedTools ToolList          `yaml:"allowed-tools,omitempty"`
+	Instructions string            `yaml:"-"`
+	Internal     bool              `yaml:"-"`
+	Extra        map[string]any    `yaml:",inline"`
 }
 
 // Summary returns a one-line summary of the skill for progressive disclosure.

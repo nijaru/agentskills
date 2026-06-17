@@ -12,7 +12,7 @@ func TestLoader(t *testing.T) {
 	content := `---
 name: test-skill
 description: A test skill for testing.
-allowed-tools: [bash, read_file]
+allowed-tools: bash read_file
 license: Apache-2.0
 compatibility: Requires git and jq
 metadata:
@@ -46,7 +46,7 @@ Use this skill for testing purposes.
 		t.Errorf("expected compatibility, got %s", s.Compatibility)
 	}
 	if len(s.AllowedTools) != 2 || s.AllowedTools[0] != "bash" {
-		t.Errorf("expected allowed-tools [bash, read_file], got %v", s.AllowedTools)
+		t.Errorf("expected allowed-tools [bash read_file], got %v", s.AllowedTools)
 	}
 	if s.Metadata["author"] != "example-org" {
 		t.Errorf("expected metadata.author example-org, got %v", s.Metadata["author"])
