@@ -258,6 +258,19 @@ func TestLoaderInvalidYAML(t *testing.T) {
 	}
 }
 
+func TestLoaderNonDictFrontmatter(t *testing.T) {
+	tmp := t.TempDir()
+	path := filepath.Join(tmp, "SKILL.md")
+	content := "---\n- just\n- a\n- list\n---\nBody\n"
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	_, err := Load(path)
+	if err == nil {
+		t.Fatal("expected YAML list frontmatter to fail")
+	}
+}
+
 func TestLoaderMissingName(t *testing.T) {
 	tmp := t.TempDir()
 	path := filepath.Join(tmp, "SKILL.md")
