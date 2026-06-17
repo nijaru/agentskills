@@ -42,9 +42,14 @@ func main() {
 ## What It Exposes
 
 - `Skill` for parsed `SKILL.md` metadata and body text, including `metadata.internal`
-- `Load` for reading a single `SKILL.md`
+- `Load` for reading a single `SKILL.md` (accepts both `SKILL.md` and `skill.md`)
 - `Registry` for discovery, lookup, and listing
+- `NormalizeName` for NFKC normalization per the spec
 - `ValidateName` for the skill-name rules used by the runtime tools
+
+Skill names support Unicode lowercase alphanumeric characters (Chinese, Russian,
+etc.) and are NFKC-normalized before validation. Unknown frontmatter fields are
+rejected to catch typos.
 
 The module stays intentionally small so other Go projects can depend on it
 without pulling in a full agent framework.
