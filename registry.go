@@ -37,7 +37,7 @@ func (r *Registry) Discover() error {
 			if err != nil {
 				return nil
 			}
-			if !info.IsDir() && info.Name() == "SKILL.md" {
+			if !info.IsDir() && isSkillFile(info.Name()) {
 				s, err := Load(path)
 				if err == nil {
 					r.skills[s.Name] = s
@@ -50,6 +50,12 @@ func (r *Registry) Discover() error {
 		}
 	}
 	return nil
+}
+
+// isSkillFile returns true if name is a valid SKILL.md filename.
+// Accepts both SKILL.md (spec-preferred) and skill.md (common variant).
+func isSkillFile(name string) bool {
+	return name == "SKILL.md" || name == "skill.md"
 }
 
 // Get returns a skill by name.

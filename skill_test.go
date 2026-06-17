@@ -3,6 +3,7 @@ package agentskills
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -142,6 +143,22 @@ func TestValidateSkill(t *testing.T) {
 	}
 }
 
+func TestValidateRejectsUnknownFields(t *testing.T) {
+	s := &Skill{
+		Name:        "test",
+		Description: "desc",
+		Extra:       map[string]any{"typo-field": "value", "another": "val"},
+	}
+	err := s.Validate()
+	if err == nil {
+		t.Fatal("expected unknown fields to be rejected")
+	}
+	msg := err.Error()
+	if !strings.Contains(msg, "typo-field") || !strings.Contains(msg, "another") {
+		t.Fatalf("error should list both unknown fields, got: %s", msg)
+	}
+}
+
 func TestRegistry(t *testing.T) {
 	tmp := t.TempDir()
 	skillDir := filepath.Join(tmp, "skills", "test")
@@ -195,5 +212,32 @@ func TestRegistryListSorted(t *testing.T) {
 			skills[1].Name,
 			skills[2].Name,
 		)
+	}
+}
+
+func TestRegistryDiscoversLowercaseSkillMd(t *testing.T) {
+	tmp := t.TempDir()
+	skillDir := filepath.Join(tmp, "skills", "lowercase")
+	if err := os.MkdirAll(skillDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	content := `---
+name: lowercase-skill
+description: Uses lowercase skill.md.
+---
+Body.
+`
+	if err := os.WriteFile(filepath.Join(skillDir, "skill.md"), []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	reg := NewRegistry(tmp)
+	if err := reg.Discover(); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, ok := reg.Get("lowercase-skill"); !ok {
+		t.Fatal("lowercase skill.md not discovered")
 	}
 }

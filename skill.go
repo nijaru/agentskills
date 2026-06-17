@@ -2,6 +2,7 @@ package agentskills
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -14,7 +15,6 @@ type Skill struct {
 	Compatibility string        `yaml:"compatibility,omitempty"`
 	Metadata     map[string]any `yaml:"metadata,omitempty"`
 	AllowedTools ToolList       `yaml:"allowed-tools,omitempty"`
-	Scripts      []string       `yaml:"scripts,omitempty"`
 	Instructions string         `yaml:"-"`
 	Internal     bool           `yaml:"-"`
 	Extra        map[string]any `yaml:",inline"`
@@ -38,6 +38,14 @@ func (s *Skill) Validate() error {
 	}
 	if len(s.Compatibility) > 500 {
 		return fmt.Errorf("skill compatibility must be 1-500 characters, got %d", len(s.Compatibility))
+	}
+	if len(s.Extra) > 0 {
+		fields := make([]string, 0, len(s.Extra))
+		for k := range s.Extra {
+			fields = append(fields, k)
+		}
+		sort.Strings(fields)
+		return fmt.Errorf("unknown frontmatter fields: %s", strings.Join(fields, ", "))
 	}
 	return nil
 }
