@@ -117,6 +117,9 @@ func TestValidateName(t *testing.T) {
 		{"end-", false},
 		{"no--double", false},
 		{"has space", false},
+		{"my_skill", false},
+		{strings.Repeat("a", 64), true},
+		{strings.Repeat("a", 65), false},
 	}
 	for _, c := range cases {
 		err := ValidateName(c.name)
@@ -143,6 +146,27 @@ func TestValidateSkill(t *testing.T) {
 	}
 }
 
+func TestValidateDescriptionTooLong(t *testing.T) {
+	s := &Skill{
+		Name:        "test",
+		Description: strings.Repeat("x", 1025),
+	}
+	if err := s.Validate(); err == nil {
+		t.Fatal("expected description too long to fail")
+	}
+}
+
+func TestValidateCompatibilityTooLong(t *testing.T) {
+	s := &Skill{
+		Name:         "test",
+		Description:  "desc",
+		Compatibility: strings.Repeat("x", 501),
+	}
+	if err := s.Validate(); err == nil {
+		t.Fatal("expected compatibility too long to fail")
+	}
+}
+
 func TestValidateRejectsUnknownFields(t *testing.T) {
 	s := &Skill{
 		Name:        "test",
@@ -156,6 +180,65 @@ func TestValidateRejectsUnknownFields(t *testing.T) {
 	msg := err.Error()
 	if !strings.Contains(msg, "typo-field") || !strings.Contains(msg, "another") {
 		t.Fatalf("error should list both unknown fields, got: %s", msg)
+	}
+}
+
+func TestLoaderMissingFrontmatter(t *testing.T) {
+	tmp := t.TempDir()
+	path := filepath.Join(tmp, "SKILL.md")
+	if err := os.WriteFile(path, []byte("# No frontmatter here"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Load(path); err == nil {
+		t.Fatal("expected missing frontmatter to fail")
+	}
+}
+
+func TestLoaderUnclosedFrontmatter(t *testing.T) {
+	tmp := t.TempDir()
+	path := filepath.Join(tmp, "SKILL.md")
+	content := "---\nname: test\ndescription: desc\n"
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Load(path); err == nil {
+		t.Fatal("expected unclosed frontmatter to fail")
+	}
+}
+
+func TestLoaderInvalidYAML(t *testing.T) {
+	tmp := t.TempDir()
+	path := filepath.Join(tmp, "SKILL.md")
+	content := "---\nname: [invalid\ndescription: broken\n---\nBody\n"
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Load(path); err == nil {
+		t.Fatal("expected invalid YAML to fail")
+	}
+}
+
+func TestLoaderMissingName(t *testing.T) {
+	tmp := t.TempDir()
+	path := filepath.Join(tmp, "SKILL.md")
+	content := "---\ndescription: A test skill\n---\nBody\n"
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Load(path); err == nil {
+		t.Fatal("expected missing name to fail")
+	}
+}
+
+func TestLoaderMissingDescription(t *testing.T) {
+	tmp := t.TempDir()
+	path := filepath.Join(tmp, "SKILL.md")
+	content := "---\nname: my-skill\n---\nBody\n"
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Load(path); err == nil {
+		t.Fatal("expected missing description to fail")
 	}
 }
 
