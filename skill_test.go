@@ -1,6 +1,7 @@
 package agentskills
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -142,11 +143,32 @@ func TestValidateNameNFKCNormalization(t *testing.T) {
 	composed := "caf\u00e9"
 
 	// Both should be valid after normalization
-	if err := ValidateName(decomposed); err != nil {
+	if err := ValidateName(NormalizeName(decomposed)); err != nil {
 		t.Errorf("decomposed form: unexpected error: %v", err)
 	}
-	if err := ValidateName(composed); err != nil {
+	if err := ValidateName(NormalizeName(composed)); err != nil {
 		t.Errorf("composed form: unexpected error: %v", err)
+	}
+}
+
+func TestLoaderNormalizesName(t *testing.T) {
+	// Decomposed café should be stored as normalized (precomposed) form
+	decomposed := "cafe\u0301"
+	composed := "caf\u00e9"
+
+	content := fmt.Sprintf("---\nname: %s\ndescription: Test skill.\n---\nBody.\n", decomposed)
+	tmp := t.TempDir()
+	path := filepath.Join(tmp, "SKILL.md")
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	s, err := Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if s.Name != composed {
+		t.Errorf("expected normalized name %q, got %q", composed, s.Name)
 	}
 }
 

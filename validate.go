@@ -8,11 +8,14 @@ import (
 	"golang.org/x/text/unicode/norm"
 )
 
-// ValidateName checks whether name is a valid skills package name.
-// Names are NFKC-normalized before validation per the Agent Skills spec.
-func ValidateName(name string) error {
-	name = norm.NFKC.String(name)
+// NormalizeName applies NFKC normalization per the Agent Skills spec.
+func NormalizeName(name string) string {
+	return norm.NFKC.String(name)
+}
 
+// ValidateName checks whether name is a valid skills package name.
+// Call NormalizeName first if the name comes from user input.
+func ValidateName(name string) error {
 	if len(name) == 0 || len(name) > 64 {
 		return fmt.Errorf("skill name must be 1-64 characters, got %d", len(name))
 	}
